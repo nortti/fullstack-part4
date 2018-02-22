@@ -2,7 +2,7 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
-const { initialBlogs, nonExistingId, blogsInDb, format } = require('./test_helper')
+const { initialBlogs, nonExistingId, blogsInDb, userFromDb } = require('./test_helper')
 
 describe('when there is initially some blogs saved', async () => {
   beforeAll(async () => {
@@ -38,12 +38,13 @@ describe('when there is initially some blogs saved', async () => {
   describe('addition of a new blog', async () => {
     test('POST /api/blogs succeeds with valid data', async () => {
       const blogsBefore = await blogsInDb()
-
+      const user = await userFromDb()
       const newBlog = {
         title: 'Blog 4',
         author: 'Author 4',
         url: 'Url 4',
-        likes: 4
+        likes: 4,
+        userId: user._id
       }
 
       await api
@@ -61,10 +62,12 @@ describe('when there is initially some blogs saved', async () => {
     })
 
     test('POST /api/blogs without likes defaults to 0', async () => {
+      const user = await userFromDb()
       const newBlog = {
         title: 'Blog 5',
         author: 'Author 5',
-        url: 'Url 5'
+        url: 'Url 5',
+        userId: user._id
       }
 
       await api
@@ -93,14 +96,12 @@ describe('when there is initially some blogs saved', async () => {
   })
 
   describe('deleting a blog', async () => {
-    test.only('DELETE /api/blogs/:id removes blog from db', async () => {
+    test('DELETE /api/blogs/:id removes blog from db', async () => {
       const blogsBefore = await blogsInDb()
       const deleteBlog = blogsBefore[0]
 
-      console.log(deleteBlog)
-
       await api
-        .delete('/api/blogs/${deleteBlog.id}')
+        .delete(`/api/blogs/${deleteBlog.id}`)
         .expect(200)
 
       const blogsAfter = await blogsInDb()

@@ -62,7 +62,7 @@ const listWithMultipleBlogs = [
   }
 ]
 
-describe.skip('list helpers', () => {
+describe('list helpers', () => {
   test('dummy is called', () => {
     const blogs = []
 
